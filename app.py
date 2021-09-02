@@ -156,247 +156,256 @@ app.title = "Stock Analysis Report"
 server = app.server
 
 
-# Read in the daily stock data
-stock_info_url = 'https://raw.githubusercontent.com/jeffreyrdcs/stock-vcpscreener/main/daily_selected_stock_info.csv'
-df = pd.read_csv(stock_info_url)
-df = df.set_index('Date')
+def serve_layout():
 
-# Read in the corresponding info dataset of the most recent day
-selected_info_url = f'https://raw.githubusercontent.com/jeffreyrdcs/stock-vcpscreener/main/output/selected_stock_{df.index[-1]}.csv'
-df_info = pd.read_csv(selected_info_url)
-df_info = df_info.drop(df_info.columns[0], axis=1)
+    # Read in the daily stock data
+    stock_info_url = 'https://raw.githubusercontent.com/jeffreyrdcs/stock-vcpscreener/main/daily_selected_stock_info.csv'
+    global df
+    df = pd.read_csv(stock_info_url)
+    df = df.set_index('Date')
 
-# Move the location of the change columns
-df_info.rename(columns={'Change': 'Change_tmp'}, inplace=True)
-df_info.rename(columns={'Change (%)': 'Change_%_tmp'}, inplace=True)
-df_info.insert(6, 'Change', df_info['Change_tmp'])
-df_info.insert(7, 'Change (%)', df_info['Change_%_tmp'])
-df_info = df_info.drop('Change_tmp', axis=1)
-df_info = df_info.drop('Change_%_tmp', axis=1)
+    # Read in the corresponding info dataset of the most recent day
+    selected_info_url = f'https://raw.githubusercontent.com/jeffreyrdcs/stock-vcpscreener/main/output/selected_stock_{df.index[-1]}.csv'
+    df_info = pd.read_csv(selected_info_url)
+    df_info = df_info.drop(df_info.columns[0], axis=1)
 
-# Get the list for droplist
-out_list = date_to_dropdown_list(df)
+    # Move the location of the change columns
+    df_info.rename(columns={'Change': 'Change_tmp'}, inplace=True)
+    df_info.rename(columns={'Change (%)': 'Change_%_tmp'}, inplace=True)
+    df_info.insert(6, 'Change', df_info['Change_tmp'])
+    df_info.insert(7, 'Change (%)', df_info['Change_%_tmp'])
+    df_info = df_info.drop('Change_tmp', axis=1)
+    df_info = df_info.drop('Change_%_tmp', axis=1)
 
-# Get the stock list of the first day for droplist
-out_stock_list = ticker_to_dropdown_list(df_info)
+    # Get the list for droplist
+    out_list = date_to_dropdown_list(df)
 
-# Make a display copy
-df_dis = pd.DataFrame([],index=df.index)
-df_dis['Number of stocks monitored'] = df['Number of stock']
-df_dis['Advanced / Declined stock'] = df['Advanced (Day)'].astype(str) +' / '+ df['Declined (Day)'].astype(str)
-df_dis['AD Percent'] = (df['Advanced (Day)'] - df['Declined (Day)'])/(df['Advanced (Day)'] + df['Declined (Day)']) * 100
-df_dis['New 52W high / New 52W low'] = df['New High'].astype(str) +' / '+ df['New Low'].astype(str)
-df_dis['Gauge (Billion $)'] = df['Gauge'] / 1e9
-df_dis['Percentage of stocks above its 20 Day SMA (SMA 20)'] = df['Stock above 20-DMA']
-df_dis['Percentage of stocks above its 50 Day SMA (SMA 50)'] = df['Stock above 50-DMA']
-df_dis['Percentage of stocks with SMA 20 > SMA 50'] = df['Stock with 20-DMA > 50-DMA']
-# df_dis['Percentage of stocks with 50 Day SMA > 200 Day SMA'] = df['Stock with 50-DMA > 200-DMA']
-df_dis['Percentage of stocks with SMA 50 > SMA 150 > SMA 200'] = df['Stock with 50 > 150 > 200-DMA']
-df_dis['Percentage of stocks trending 200 Day SMA'] = df['Stock with 200-DMA is rising']
-df_dis['Number of stocks that fit the criteria'] = df['Number of Stock that fit condition']
-df_dis['Percentage of stocks that fit the criteria'] = df['Number of Stock that fit condition(%)']
+    # Get the stock list of the first day for droplist
+    out_stock_list = ticker_to_dropdown_list(df_info)
 
-# Convert the string column into an object column
-df['Breadth Percentage'] = df['Breadth Percentage'].apply(convert_str_column)
-df['Tickers that fit the conditions'] = df['Tickers that fit the conditions'].apply(convert_str_column_str)
-df['RS rating of Tickers'] = df['RS rating of Tickers'].apply(convert_str_column)
-df['RS rank of Tickers'] = df['RS rank of Tickers'].apply(convert_str_column)
+    # Make a display copy
+    global df_dis
+    df_dis = pd.DataFrame([],index=df.index)
+    df_dis['Number of stocks monitored'] = df['Number of stock']
+    df_dis['Advanced / Declined stock'] = df['Advanced (Day)'].astype(str) +' / '+ df['Declined (Day)'].astype(str)
+    df_dis['AD Percent'] = (df['Advanced (Day)'] - df['Declined (Day)'])/(df['Advanced (Day)'] + df['Declined (Day)']) * 100
+    df_dis['New 52W high / New 52W low'] = df['New High'].astype(str) +' / '+ df['New Low'].astype(str)
+    df_dis['Gauge (Billion $)'] = df['Gauge'] / 1e9
+    df_dis['Percentage of stocks above its 20 Day SMA (SMA 20)'] = df['Stock above 20-DMA']
+    df_dis['Percentage of stocks above its 50 Day SMA (SMA 50)'] = df['Stock above 50-DMA']
+    df_dis['Percentage of stocks with SMA 20 > SMA 50'] = df['Stock with 20-DMA > 50-DMA']
+    # df_dis['Percentage of stocks with 50 Day SMA > 200 Day SMA'] = df['Stock with 50-DMA > 200-DMA']
+    df_dis['Percentage of stocks with SMA 50 > SMA 150 > SMA 200'] = df['Stock with 50 > 150 > 200-DMA']
+    df_dis['Percentage of stocks trending 200 Day SMA'] = df['Stock with 200-DMA is rising']
+    df_dis['Number of stocks that fit the criteria'] = df['Number of Stock that fit condition']
+    df_dis['Percentage of stocks that fit the criteria'] = df['Number of Stock that fit condition(%)']
 
-# Compute the AD Percentage
-# df['Tmp'] = (df['Advanced (Day)'] - df['Declined (Day)'])/(df['Advanced (Day)'] + df['Declined (Day)']) * 100
-# df.insert(3, 'AD Percent', df['Tmp'])
-# df = df.drop('Tmp', axis=1)
+    # Convert the string column into an object column
+    df['Breadth Percentage'] = df['Breadth Percentage'].apply(convert_str_column)
+    df['Tickers that fit the conditions'] = df['Tickers that fit the conditions'].apply(convert_str_column_str)
+    df['RS rating of Tickers'] = df['RS rating of Tickers'].apply(convert_str_column)
+    df['RS rank of Tickers'] = df['RS rank of Tickers'].apply(convert_str_column)
+
+    # Compute the AD Percentage
+    # df['Tmp'] = (df['Advanced (Day)'] - df['Declined (Day)'])/(df['Advanced (Day)'] + df['Declined (Day)']) * 100
+    # df.insert(3, 'AD Percent', df['Tmp'])
+    # df = df.drop('Tmp', axis=1)
+
+    up_layout = html.Div([
+
+        # html.H4("Dashboard with Dash", style={'text-align': 'center'}, className="padded"),
+
+        dcc.Dropdown(id="check_date",
+                     options=out_list,
+                     multi=False,
+                     value=out_list[-1]['value'],
+                     style={'width': "50%", 'float':'right'}
+                     ),
+
+        html.Div(id='output_container', children=[],
+                style={"margin-bottom": "20px"}, className='headtitle padded'
+                ),
+
+        html.Div(
+            [
+                html.H6("What are we showing here?"),
+                html.Br([]),
+                dcc.Markdown('''
+                The top stocks in the US market are selected based on multiple criteria applied to \
+                the simple moving averages and price performance over the last year. \
+                This report is generated based on the output of a custom US stock screener package 'stock_vcpscreener'. \
+                The source code of the stock screener package and this dashboard can be found [here](https://github.com/jeffreyrdcs/stock-vcpscreener) at my github. \
+                The screener calculates various market breadth indicators and selects stocks on a daily basis based on the criteria. \
+                To rank the selected stocks, a rating score is computed using past performances, similar to the IBD RS rating. \
+                The rating and rank of the stock can be found in the summary table.''',
+                style={"color": "#ffffff"},
+                className="row",
+                ),
+            ],
+            className='s-summary',
+            style={"margin-bottom": "15px"},
+        ),
+
+
+        # Row 1
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H6(
+                            "Stock Ratings (Top 50 that fit the criteria)", className="subtitle padded"
+                        ),
+                        dcc.Graph(id='stock_bar',
+                                  figure={},
+                                  config={"displayModeBar": False, "responsive": True})
+                    ],
+                    className="twelve columns",
+                ),
+            ],
+            className="row",
+            style={"margin-bottom": "5px"},
+        ),
+
+
+        # Row 2
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H6(
+                            "Daily Market Breadth", className="subtitle padded"
+                        ),
+                        dcc.Graph(id='breadth_hist',
+                                  figure={},
+                                  config={"displayModeBar": False})
+                    ],
+                    className="six columns",
+                ),
+                html.Div(
+                    [
+                        html.H6(
+                            "Daily Market Performance",
+                            className="subtitle padded",
+                        ),
+                        html.Div(make_performance_table(df_dis[df.index == df.index[-1]]),
+                            id='daily_report'
+                            ),
+                    ],
+                    className="six columns",
+                ),
+            ],
+            className="row",
+            style={"margin-bottom": "5px"},
+        ),
+
+        # Row 3
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H6(
+                            "Stock Summary (Top 50 that fit the criteria)", className="subtitle padded"
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                    html.Div(make_stock_info_table(df_info),
+                                        id='stock_report'
+                                        ),
+                                    ], className="table-scroll"
+                                ),
+                            ], className="table-wrapper"),
+                    ],
+                    className="twelve columns",
+                ),
+            ],
+            className="row",
+            style={"margin-bottom": "15px"},
+        ),
+
+        # Row 4
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.H6(
+                            "Charts", className="subtitle padded",
+                        ),
+                    ], className="twelve columns"),
+
+                html.Div(
+                    [
+                        dcc.Dropdown(id="check_stock1",
+                                     options=out_stock_list,
+                                     multi=False,
+                                     value=out_stock_list[0]['value'],
+                                     style={'width': '50%'}
+                                     ),
+                        dcc.Graph(id='stock_chart1',
+                                  figure={},
+                                  config={"displayModeBar": False})
+                    ],
+                    className="six columns",
+                ),
+
+                html.Div(
+                    [
+                        dcc.Dropdown(id="check_stock2",
+                                     options=out_stock_list,
+                                     multi=False,
+                                     value=out_stock_list[1]['value'],
+                                     style={'width': '50%'}
+                                     ),
+                        dcc.Graph(id='stock_chart2',
+                                  figure={},
+                                  config={"displayModeBar": False})
+                    ],
+                    className="six columns",
+                ),
+
+                html.Div(
+                    [
+                        dcc.Dropdown(id="check_stock3",
+                                     options=out_stock_list,
+                                     multi=False,
+                                     value=out_stock_list[2]['value'],
+                                     style={'width': '50%'}
+                                     ),
+                        dcc.Graph(id='stock_chart3',
+                                  figure={},
+                                  config={"displayModeBar": False})
+                    ],
+                    className="six columns",
+                ),
+
+                html.Div(
+                    [
+                        dcc.Dropdown(id="check_stock4",
+                                     options=out_stock_list,
+                                     multi=False,
+                                     value=out_stock_list[3]['value'],
+                                     style={'width': '50%'}
+                                     ),
+                        dcc.Graph(id='stock_chart4',
+                                  figure={},
+                                  config={"displayModeBar": False})
+                    ],
+                    className="six columns",
+                ),
+            ],
+            className="row",
+            style={"margin-bottom": "15px"},
+        ),
+    ],className="page")
+
+    return up_layout
+
 
 
 # ------------------------------------------------------------------------------
 # Page layout
-app.layout = html.Div([
-
-    # html.H4("Dashboard with Dash", style={'text-align': 'center'}, className="padded"),
-
-    dcc.Dropdown(id="check_date",
-                 options=out_list,
-                 multi=False,
-                 value=out_list[-1]['value'],
-                 style={'width': "50%", 'float':'right'}
-                 ),
-
-    html.Div(id='output_container', children=[],
-            style={"margin-bottom": "20px"}, className='headtitle padded'
-            ),
-
-    html.Div(
-        [
-            html.H6("What are we showing here?"),
-            html.Br([]),
-            dcc.Markdown('''
-            The top stocks in the US market are selected based on multiple criteria applied to \
-            the simple moving averages and price performance over the last year. \
-            This report is generated based on the output of a custom US stock screener package 'stock_vcpscreener'. \
-            The source code of the stock screener package and this dashboard can be found [here](https://github.com/jeffreyrdcs/stock-vcpscreener) at my github. \
-            The screener calculates various market breadth indicators and selects stocks on a daily basis based on the criteria. \
-            To rank the selected stocks, a rating score is computed using past performances, similar to the IBD RS rating. \
-            The rating and rank of the stock can be found in the summary table.''',
-            style={"color": "#ffffff"},
-            className="row",
-            ),
-        ],
-        className='s-summary',
-        style={"margin-bottom": "15px"},
-    ),
-
-
-    # Row 1
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.H6(
-                        "Stock Ratings (Top 50 that fit the criteria)", className="subtitle padded"
-                    ),
-                    dcc.Graph(id='stock_bar',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="twelve columns",
-            ),
-        ],
-        className="row",
-        style={"margin-bottom": "5px"},
-    ),
-
-
-    # Row 2
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.H6(
-                        "Daily Market Breadth", className="subtitle padded"
-                    ),
-                    dcc.Graph(id='breadth_hist',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="six columns",
-            ),
-            html.Div(
-                [
-                    html.H6(
-                        "Daily Market Performance",
-                        className="subtitle padded",
-                    ),
-                    html.Div(make_performance_table(df_dis[df.index == df.index[-1]]),
-                        id='daily_report'
-                        ),
-                ],
-                className="six columns",
-            ),
-        ],
-        className="row",
-        style={"margin-bottom": "5px"},
-    ),
-
-    # Row 3
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.H6(
-                        "Stock Summary (Top 50 that fit the criteria)", className="subtitle padded"
-                    ),
-                    html.Div(
-                        [
-                            html.Div(
-                                [
-                                html.Div(make_stock_info_table(df_info),
-                                    id='stock_report'
-                                    ),
-                                ], className="table-scroll"
-                            ),
-                        ], className="table-wrapper"),
-                ],
-                className="twelve columns",
-            ),
-        ],
-        className="row",
-        style={"margin-bottom": "15px"},
-    ),
-
-    # Row 4
-    html.Div(
-        [
-            html.Div(
-                [
-                    html.H6(
-                        "Charts", className="subtitle padded",
-                    ),
-                ], className="twelve columns"),
-
-            html.Div(
-                [
-                    dcc.Dropdown(id="check_stock1",
-                                 options=out_stock_list,
-                                 multi=False,
-                                 value=out_stock_list[0]['value'],
-                                 style={'width': '50%'}
-                                 ),
-                    dcc.Graph(id='stock_chart1',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="six columns",
-            ),
-
-            html.Div(
-                [
-                    dcc.Dropdown(id="check_stock2",
-                                 options=out_stock_list,
-                                 multi=False,
-                                 value=out_stock_list[1]['value'],
-                                 style={'width': '50%'}
-                                 ),
-                    dcc.Graph(id='stock_chart2',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="six columns",
-            ),
-
-            html.Div(
-                [
-                    dcc.Dropdown(id="check_stock3",
-                                 options=out_stock_list,
-                                 multi=False,
-                                 value=out_stock_list[2]['value'],
-                                 style={'width': '50%'}
-                                 ),
-                    dcc.Graph(id='stock_chart3',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="six columns",
-            ),
-
-            html.Div(
-                [
-                    dcc.Dropdown(id="check_stock4",
-                                 options=out_stock_list,
-                                 multi=False,
-                                 value=out_stock_list[3]['value'],
-                                 style={'width': '50%'}
-                                 ),
-                    dcc.Graph(id='stock_chart4',
-                              figure={},
-                              config={"displayModeBar": False})
-                ],
-                className="six columns",
-            ),
-        ],
-        className="row",
-        style={"margin-bottom": "15px"},
-    ),
-],className="page")
+app.layout = serve_layout
 
 
 # ------------------------------------------------------------------------------
