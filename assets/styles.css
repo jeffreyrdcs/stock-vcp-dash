@@ -129,7 +129,8 @@ th {
 }
 
 .trfixsize {
-  width: 945px;
+   width: 945px;
+/*  width: 100%;*/
 
 }
 
@@ -329,12 +330,6 @@ a:active {
     height: 20px;
     width: auto;
   }
-  #learn-more-button {
-    line-height: 0;
-    font-size: 10px;
-    height: 30px;
-    padding: 0 10px;
-  }
   h5 {
     font-size: 1.5rem;
   }
@@ -345,6 +340,9 @@ a:active {
   }
   .five.columns {
     width: 45%;
+  }
+  .six.columns {
+    width: 90%;
   }
   .fees {
     width: auto;

@@ -1,69 +1,24 @@
 /* original style sheet */
+@font-face {
+  font-family: "FontAwesome";
+  src: url("../fonts/fontawesome-webfont.eot?v=4.7.0");
+  src: url("../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0")
+      format("embedded-opentype"),
+    url("../fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"),
+    url("../fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"),
+    url("../fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"),
+    url("../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular")
+      format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
 
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: #fafafa;
-  font-size: 1.1rem;
-  line-height: 1.3;
-}
-* {
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-}
-.page {
-  position: relative;
-  width: 210mm;
-  min-height: 300mm;
-  padding: 0mm;
-  margin: 10mm auto;
-  /* border: 1px #D3D3D3 solid; */
-  border-radius: 5px;
-  background: white;
-  /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); */
-}
-.subpage {
+/*.subpage {
   padding: 1cm;
   border: 5px #ccc solid;
   height: 257mm;
   outline: 2cm whitesmoke solid;
-}
-
-@page {
-  size: A4;
-  margin: 0;
-}
-@media print {
-  html,
-  body {
-    width: 210mm;
-    height: 297mm;
-  }
-  .page {
-    margin: 0;
-    border: initial;
-    border-radius: initial;
-    width: initial;
-    min-height: initial;
-    box-shadow: initial;
-    background: initial;
-    page-break-after: always;
-  }
-  .no-print,
-  .no-print * {
-    display: none !important;
-  }
-}
-
-p {
-  margin-bottom: 1rem;
-}
-
-.iframe {
-  border: none;
-}
+}*/
 
 .gs-header {
   color: white !important;
@@ -96,20 +51,6 @@ p.padded {
   margin-bottom: 2px;
 }
 
-.blue-text {
-  color: #8496b8;
-}
-
-table {
-  width: 100%;
-}
-
-
-tr:nth-child(even) {
-  background-color: #d7dbe1;
-  -webkit-print-color-adjust: exact;
-}
-
 table.reversed tr:nth-child(odd) {
   background-color: #d7dbe1;
   -webkit-print-color-adjust: exact;
@@ -133,17 +74,6 @@ table.tiny-header tr:first-child {
 /* .row > .columns:not(:first-child){
 padding-left: 20px;
 } */
-
-td,
-th {
-  border: 0;
-}
-
-h1,
-h5,
-h6 {
-  margin: 0;
-}
 
 h6 {
   font-size: 1.425rem;
