@@ -153,6 +153,8 @@ def get_ohlc_data_web(in_ticker):
 app = dash.Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}])
 app.title = "Stock Analysis Report"
 
+server = app.server
+
 
 # Read in the daily stock data
 stock_info_url = 'https://raw.githubusercontent.com/jeffreyrdcs/stock-vcpscreener/main/daily_selected_stock_info.csv'
@@ -681,5 +683,5 @@ def display_stock_graph4(in_ticker, in_date):
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run_server()  #debug=True
+    app.run_server(debug=True)  #debug=True
 
