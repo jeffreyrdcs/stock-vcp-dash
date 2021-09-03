@@ -17,6 +17,7 @@ The dash app is then available at http://127.0.0.1:8050
 The Dash app can be accessed at the link below:
 
 https://stock-vcp-dash.herokuapp.com/
+
 https://jeffreyrdcs.pythonanywhere.com
 
 
