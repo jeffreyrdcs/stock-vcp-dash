@@ -80,7 +80,7 @@ def make_stock_info_table(df):
 def convert_str_column(in_df):
     ''' Convert the string coloumn back into a array of float '''
     in_df = re.sub("[\[\]']",'',in_df)
-    return np.array(in_df.split(',')).astype(np.float)
+    return np.array(in_df.split(',')).astype(float)
 
 
 def convert_str_column_str(in_df):
@@ -437,7 +437,7 @@ def display_page(in_check_date):
 
     # For the daily breadth histogram
     dff_histodata = dff['Breadth Percentage'].to_numpy()[0]
-    to_plot = (dff_histodata > -20) & (dff_histodata < 20)
+    to_plot_range = (dff_histodata > -20) & (dff_histodata < 20)
     # print(len(dff_histodata[to_plot]))
 
     # Read in the corresponding info dataset
@@ -458,9 +458,12 @@ def display_page(in_check_date):
     container = "US Stock Market Analysis Report for {}".format(in_check_date)  #, len(dff['Breadth Percentage'].values[0]
 
     # Update stock rating plot
+    num_tickers = len(dff['RS rating of Tickers'].iloc[0][0:50])
+    print(dff.head(10))
+
     fig = px.bar(
                 y=dff['RS rating of Tickers'].iloc[0][0:50], color_continuous_scale=px.colors.sequential.Greens_r[1:7],
-                color=np.linspace(0,255,50),
+                color=np.linspace(0,255,num_tickers),
                 x=dff['Tickers that fit the conditions'].iloc[0][0:50],
                 orientation='v')
     fig.update_coloraxes(showscale=False)
@@ -479,7 +482,7 @@ def display_page(in_check_date):
                       xaxis_title="", title_x=0.5, title_y=1.0)
 
     # Update daily breadth plot
-    fig2 = px.histogram(x=dff_histodata[to_plot], range_x=[-20,20], nbins=100,
+    fig2 = px.histogram(x=dff_histodata[to_plot_range], range_x=[-20,20], nbins=100,
                     labels={"value": "Percentage Change (%)"},
                     color_discrete_sequence=['#009900'], title='')
     fig2.add_annotation(xref="x domain",
