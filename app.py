@@ -459,7 +459,6 @@ def display_page(in_check_date):
 
     # Update stock rating plot
     num_tickers = len(dff['RS rating of Tickers'].iloc[0][0:50])
-    print(dff.head(10))
 
     fig = px.bar(
                 y=dff['RS rating of Tickers'].iloc[0][0:50], color_continuous_scale=px.colors.sequential.Greens_r[1:7],
