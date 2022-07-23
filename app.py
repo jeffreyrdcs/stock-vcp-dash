@@ -51,12 +51,10 @@ def make_performance_table(df):
 
 def make_stock_info_table(df):
     """Return a dash definition of an HTML table for a dataframe. For selected stock info. Only return the top 50."""
-    num_out = 50
-    selected_stock_df = df.loc[0:num_out - 1]
+    selected_stock_df = df.loc[0:_MAX_NUM_OF_STOCK_TO_DISPLAY - 1]
 
     table = []
 
-    # Header of the table
     header = [html.Td("Rank")]
     for col in selected_stock_df.columns:
         header.append(html.Td(col))
@@ -80,22 +78,24 @@ def make_stock_info_table(df):
                 tmprow.append(html.Td(f'{item:.2f}', className="tdchangeneg"))
             else:
                 tmprow.append(html.Td(f'{item:.2f}'))
-        tmprow.insert(0, html.Td(str(ind + 1)))
+
+        rank = str(ind + 1)
+        tmprow.insert(0, html.Td(rank))
         table.append(html.Tr(tmprow))
 
-    return html.Table(table, className='trfixsize')
+    return html.Table(table, className="trfixsize")
 
 
-def _convert_str_list_column_to_float(in_df):
-    """Convert the string column back into an array of float."""
-    in_df = re.sub("[\[\]']", '', in_df)
-    return np.array(in_df.split(',')).astype(float)
+def _convert_str_list_column_to_float(in_str):
+    """Convert the string column back into an array of float. Could use np.fromstring(mmmm.strip("[]"), sep=',')."""
+    in_str = re.sub("[\[\]']", '', in_str)
+    return np.array(in_str.split(',')).astype(float)
 
 
-def _convert_str_list_column_to_str(in_df):
-    """Convert the string column back into an array of str."""
-    in_df = re.sub("[\[\]']", '', in_df)
-    return np.array(in_df.split(','))
+def _convert_str_list_column_to_str(in_str):
+    """Convert the string column back into an array of str. Could use literal_eval"""
+    in_str = re.sub("[\[\]']", '', in_str)
+    return np.array(in_str.split(','))
 
 
 def _get_dropdown_list_from_date_index(in_df):
@@ -112,15 +112,15 @@ def _get_dropdown_list_from_ticker(in_df):
 
 def get_ohlc_data(in_ticker):
     """Fetch OHLC data from csv, format the DataFrame and compute SMA."""
-    db_add = '../stock_vcpscreener/db_yfinance/'
+    db_dir_add = '../stock_vcpscreener/db_yfinance/'
     db_filename = in_ticker.strip().ljust(5, '_') + '.csv'
-    ticker_data_df = pd.read_csv(db_add + db_filename)
-    ticker_data_df['Date'] = pd.to_datetime(ticker_data_df['Date'])
-    ticker_data_df = ticker_data_df.set_index('Date')
+    ticker_data_df = pd.read_csv(db_dir_add + db_filename)
+    ticker_data_df["Date"] = pd.to_datetime(ticker_data_df["Date"])
+    ticker_data_df = ticker_data_df.set_index("Date")
 
-    ticker_data_df['SMA_20'] = ticker_data_df['Adj Close'].rolling(window=20).mean()
-    ticker_data_df['SMA_50'] = ticker_data_df['Adj Close'].rolling(window=50).mean()
-    ticker_data_df['SMA_200'] = ticker_data_df['Adj Close'].rolling(window=200).mean()
+    ticker_data_df["SMA_20"] = ticker_data_df["Adj Close"].rolling(window=20).mean()
+    ticker_data_df["SMA_50"] = ticker_data_df["Adj Close"].rolling(window=50).mean()
+    ticker_data_df["SMA_200"] = ticker_data_df["Adj Close"].rolling(window=200).mean()
 
     return ticker_data_df
 
@@ -136,9 +136,9 @@ def get_ohlc_data_web(in_ticker):
                                         end=curr_day.date(),
                                         threads=False)
 
-    ticker_data_df['SMA_20'] = ticker_data_df['Adj Close'].rolling(window=20).mean()
-    ticker_data_df['SMA_50'] = ticker_data_df['Adj Close'].rolling(window=50).mean()
-    ticker_data_df['SMA_200'] = ticker_data_df['Adj Close'].rolling(window=200).mean()
+    ticker_data_df["SMA_20"] = ticker_data_df["Adj Close"].rolling(window=20).mean()
+    ticker_data_df["SMA_50"] = ticker_data_df["Adj Close"].rolling(window=50).mean()
+    ticker_data_df["SMA_200"] = ticker_data_df["Adj Close"].rolling(window=200).mean()
 
     return ticker_data_df
 
@@ -167,10 +167,10 @@ def serve_layout():
          '52 Week Max', 'RS Rating', 'RS Rank']
     ]
 
-    # Get the list for droplist
+    # Get the list for drop list
     out_date_list = _get_dropdown_list_from_date_index(df)
 
-    # Get the stock list of the most recent day for droplist
+    # Get the stock list of the most recent day for drop list
     out_stock_list = _get_dropdown_list_from_ticker(df_info)
 
     # Make a display copy
@@ -199,11 +199,7 @@ def serve_layout():
                      value=out_date_list[-1]["value"],
                      style={"width": "50%", "float": "right"}
                      ),
-
-        html.Div(id="output_container", children=[],
-                 style={"margin-bottom": "20px"}, className="headtitle padded"
-                 ),
-
+        html.Div(id="output_container", children=[], style={"margin-bottom": "20px"}, className="headtitle padded"),
         html.Div(
             [
                 html.H6("What are we showing here?"),
@@ -315,6 +311,7 @@ def serve_layout():
 def _get_chart_divs(stock_list):
     """Return a list of Divs depend on the number of items in the stock list."""
     num_of_selected_stocks = len(stock_list)
+
     chart_divs = [
         html.Div(
             [
@@ -368,7 +365,6 @@ def _get_dropdown_list_and_chart(dropdown_id, dropdown_options, dropdown_value, 
 # Page layout
 app.layout = serve_layout
 
-# REFACTOR HEREHERE
 # ------------------------------------------------------------------------------
 # Call back functions
 @app.callback(
@@ -391,39 +387,40 @@ app.layout = serve_layout
 def display_page(in_check_date):
     print(f'Viewing report for {in_check_date}')
 
-    dff = df[df.index == in_check_date].copy()
-    dff_dis = df_dis[df_dis.index == in_check_date].copy()
+    df_match_date = df[df.index == in_check_date].copy()
+    df_dis_match_date = df_dis[df_dis.index == in_check_date].copy()
 
     # For the daily breadth histogram
-    dff_histodata = dff['Breadth Percentage'].iloc[0]
-    to_plot = (dff_histodata > -20) & (dff_histodata < 20)
+    df_match_date_histodata = df_match_date['Breadth Percentage'].iloc[0]
+    histogram_range_to_plot = (df_match_date_histodata > -20) & (df_match_date_histodata < 20)
 
     # Read the corresponding info dataset of the selected date
     selected_info_file = f'{_STOCK_INFO_URL_PATH_NAME}output/selected_stock_{in_check_date}.csv'
-    dff_info = pd.read_csv(selected_info_file)
-    dff_info = dff_info.drop(dff_info.columns[0], axis=1)
+    df_match_date_info = pd.read_csv(selected_info_file)
+    df_match_date_info = df_match_date_info.drop(df_match_date_info.columns[0], axis=1)
 
     # Reorder the columns, move the location of the change columns
-    dff_info = dff_info[
+    df_match_date_info = df_match_date_info[
         ['Ticker', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Change', 'Change (%)', 'Volume', '52 Week Min',
          '52 Week Max', 'RS Rating', 'RS Rank']
     ]
 
-    if dff_info.shape[0] >= _MAX_NUM_OF_STOCK_TO_DISPLAY:
+    if df_match_date_info.shape[0] >= _MAX_NUM_OF_STOCK_TO_DISPLAY:
         num_of_stocks_to_display = _MAX_NUM_OF_STOCK_TO_DISPLAY
     else:
-        num_of_stocks_to_display = dff_info.shape[0]
+        num_of_stocks_to_display = df_match_date_info.shape[0]
 
     # Update text in the status container
     container = f"US Stock Market Analysis Report for {in_check_date}"
 
     # Update stock rating plot
     fig = px.bar(
-        y=dff['RS rating of Tickers'].iloc[0][0:num_of_stocks_to_display],
+        x=df_match_date['Tickers that fit the conditions'].iloc[0][0:num_of_stocks_to_display],
+        y=df_match_date['RS rating of Tickers'].iloc[0][0:num_of_stocks_to_display],
         color_continuous_scale=px.colors.sequential.Greens_r[1:7],
         color=np.linspace(0, 255, num_of_stocks_to_display),
-        x=dff['Tickers that fit the conditions'].iloc[0][0:num_of_stocks_to_display],
-        orientation='v')
+        orientation='v'
+    )
     fig.update_coloraxes(showscale=False)
     fig.update_yaxes(categoryorder="total ascending")
     fig.update_layout(showlegend=False, autosize=False, hovermode="x",
@@ -440,7 +437,7 @@ def display_page(in_check_date):
                       xaxis_title="", title_x=0.5, title_y=1.0)
 
     # Update daily breadth plot
-    fig2 = px.histogram(x=dff_histodata[to_plot], range_x=[-20, 20], nbins=100,
+    fig2 = px.histogram(x=df_match_date_histodata[histogram_range_to_plot], range_x=[-20, 20], nbins=100,
                         labels={"value": "Percentage Change (%)"},
                         color_discrete_sequence=['#009900'], title='')
     fig2.add_annotation(xref="x domain",
@@ -448,7 +445,7 @@ def display_page(in_check_date):
                         x=0.025,
                         y=0.975,
                         showarrow=False,
-                        text=f"Net Breadth (AD Percent) = {dff_dis['AD Percent'].values[0]:.2f}%"
+                        text=f"Net Breadth (AD Percent) = {df_dis_match_date['AD Percent'].values[0]:.2f}%"
                         )
     fig2.add_vline(x=0, line_width=2, line_dash="dash",
                    line_color='rgba(227,227,227,0.75)')
@@ -468,18 +465,16 @@ def display_page(in_check_date):
                        xaxis_title='Percentage Change (%)',
                        yaxis_title="Count", title_x=0.5, title_y=1.0)
 
-    # Update daily table
-    table_daily = make_performance_table(dff_dis)
-
-    # Update stock info table
-    table_info = make_stock_info_table(dff_info)
+    # Update daily performance table and stock info table
+    table_daily = make_performance_table(df_dis_match_date)
+    table_info = make_stock_info_table(df_match_date_info)
 
     # Update the check_stock1 and 2 dropdown list
-    out_stock_list = _get_dropdown_list_from_ticker(dff_info)
+    out_stock_list = _get_dropdown_list_from_ticker(df_match_date_info)
 
     # Get the default values for the stock charts
     out_stock_value1, out_stock_value2, out_stock_value3, out_stock_value4 = _get_default_stock_chart_values(
-        out_stock_list, dff_info
+        out_stock_list, df_match_date_info
     )
 
     return container, fig2, table_daily, fig, table_info, \
@@ -493,14 +488,14 @@ def _get_default_stock_chart_values(stock_list, df):
     output_list = []
     if num_of_stocks < _NUM_OF_STOCK_CHART_TO_DISPLAY:
         for stock in stock_list:
-            output_list.append(stock['value'])
+            output_list.append(stock["value"])
 
         while len(output_list) < _NUM_OF_STOCK_CHART_TO_DISPLAY:
-            output_list.append(stock_list[0]['value'])
+            output_list.append(stock_list[0]["value"])
 
         return output_list
     else:
-        return [stock_list[i]['value'] for i in range(_NUM_OF_STOCK_CHART_TO_DISPLAY)]
+        return [stock_list[i]["value"] for i in range(_NUM_OF_STOCK_CHART_TO_DISPLAY)]
 
 
 # Callbacks to update the stock OHLC charts. Made them individual function so that we can change the input for them.
@@ -581,7 +576,6 @@ def _get_stock_graph(stock_df, in_ticker, in_date):
         xaxis_title="", yaxis_title="",
         title_x=0.5, title_y=1.0,
     )
-
     fig.add_vline(x=in_date, line_width=2, line_dash="dash", line_color="rgba(227,227,227,0.75)")
 
     return fig
