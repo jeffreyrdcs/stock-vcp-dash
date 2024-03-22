@@ -89,6 +89,10 @@ def make_stock_info_table(df):
 def _convert_str_list_column_to_float(in_str):
     """Convert the string column back into an array of float. Could use np.fromstring(mmmm.strip("[]"), sep=',')."""
     in_str = re.sub("[\[\]']", '', in_str)
+
+    if not in_str:
+        return np.nan
+
     return np.array(in_str.split(',')).astype(float)
 
 
