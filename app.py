@@ -166,10 +166,13 @@ def serve_layout():
     df_info = df_info.drop(df_info.columns[0], axis=1)
 
     # Reorder the columns, move the location of the change columns
-    df_info = df_info[
-        ['Ticker', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Change', 'Change (%)', 'Volume', '52 Week Min',
-         '52 Week Max', 'RS Rating', 'RS Rank']
-    ]
+    try:
+        df_info = df_info[
+            ['Ticker', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Change', 'Change (%)', 'Volume', '52 Week Min',
+             '52 Week Max', 'RS Rating', 'RS Rank']
+        ]
+    except KeyError as e:
+        print(f"Some columns in the {selected_info_file} file are not as expected. Please check the file. KeyError: {e}")
 
     # Get the list for drop list
     out_date_list = _get_dropdown_list_from_date_index(df)
